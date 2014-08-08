@@ -166,7 +166,7 @@ TF1* lanGausFit(TH1* inHist, double negSigmaFit, double posSigmaFit) // function
   plhi[0]=20.0; plhi[1]=200.0; plhi[2]=10000000.0; plhi[3]=gausSig;
 
   TF1* ffit = new TF1("lanGausFit", langaufun, fr[0], fr[1], 4);
-  //  ffit->SetNpx(1e4);
+  ffit->SetNpx(1e4);
   ffit->SetParameters(sv);
   ffit->SetParNames("Width","MPV","Area","GSigma");
   ffit->SetLineColor(kRed);
