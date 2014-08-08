@@ -1,0 +1,4 @@
+Package to study the properties of the landau and landau gaussian convolution fit in root (as applied for test beam analysis).
+Problems:
+- check seeds for the random generators used in the to genrate the distributions
+- check histograms and functions limits in the generations
