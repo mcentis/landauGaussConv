@@ -82,6 +82,8 @@ int main(int argc, char* argv[])
   for(int i = 0; i < 10; ++i)
     {
       gausSig = i * 2;
+      if(gausSig == 0) gausSig = 0.01; // gaus with 0 sigma creates problems
+
       hist = genLangaus(nEntries, lanMPV, lanWidth, gausSig);
       fit = lanGausFit(hist, 10, 100); // warning: fixed parameters!!!!
       hist->Write();
