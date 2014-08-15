@@ -11,7 +11,7 @@ TH1F* genLangaus(int nEntries, double lanMPV, double lanWidth, double gausSigma)
   lan->SetParameters(100, lanMPV, lanWidth); // parameters: constant (as for gaus), mpv, width
 
   TF1* gaus = new TF1("gaus", "gaus", -500, 500); // check limits !!!
-  gaus->SetParameters(100, 0, 3);
+  gaus->SetParameters(100, 0, gausSigma);
 
   char name[200];
   sprintf(name, "lanGausHist_%d_%.00f_%.00f_%.00f", nEntries, lanMPV, lanWidth, gausSigma);
