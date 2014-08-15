@@ -67,6 +67,18 @@ int main(int argc, char* argv[])
   fitGsigvsGenSig->SetName(name);
   fitGsigvsGenSig->SetTitle(title);
 
+  sprintf(name, "fitLanW_genLanMPV_%.00f_genLanWidth_%.00f", lanMPV, lanWidth);
+  sprintf(title, "Fitted Landau width vs generator gaus sigma, generator: lanMPV %.00f, lanWidth %.00f", lanMPV, lanWidth);
+  TGraphErrors* fitWidthvsGenSig = new TGraphErrors();
+  fitWidthvsGenSig->SetName(name);
+  fitWidthvsGenSig->SetTitle(title);
+
+  sprintf(name, "fitMax_genLanMPV_%.00f_genLanWidth_%.00f", lanMPV, lanWidth);
+  sprintf(title, "Max of the fit function vs generator gaus sigma, generator: lanMPV %.00f, lanWidth %.00f", lanMPV, lanWidth);
+  TGraphErrors* fitMaxvsGenSig = new TGraphErrors();
+  fitMaxvsGenSig->SetName(name);
+  fitMaxvsGenSig->SetTitle(title);
+
   for(int i = 0; i < 10; ++i)
     {
       gausSig = i * 2;
@@ -80,6 +92,11 @@ int main(int argc, char* argv[])
 
       fitGsigvsGenSig->SetPoint(nPoint, gausSig, fit->GetParameter(3));
       fitGsigvsGenSig->SetPointError(nPoint, 0, fit->GetParError(3));
+
+      fitWidthvsGenSig->SetPoint(nPoint, gausSig, fit->GetParameter(0));
+      fitWidthvsGenSig->SetPointError(nPoint, 0, fit->GetParError(0));
+
+      fitMaxvsGenSig->SetPoint(nPoint, gausSig, fit->GetMaximumX());
     }
 
   fitMPVvsGenSig->Draw("AP");
@@ -90,11 +107,21 @@ int main(int argc, char* argv[])
   fitGsigvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
   fitGsigvsGenSig->GetYaxis()->SetTitle("Fitted Gauss sigma [A. U.]");
 
+  fitWidthvsGenSig->Draw("AP");
+  fitWidthvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitWidthvsGenSig->GetYaxis()->SetTitle("Fitted Landau width [A. U.]");
+
+  fitMaxvsGenSig->Draw("AP");
+  fitMaxvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitMaxvsGenSig->GetYaxis()->SetTitle("Max of the fit function [A. U.]");
+
   delete servCan;
 
   outFile->cd();
   fitMPVvsGenSig->Write();
   fitGsigvsGenSig->Write();
+  fitWidthvsGenSig->Write();
+  fitMaxvsGenSig->Write();
 
   outFile->Close();
 
