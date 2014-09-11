@@ -47,10 +47,12 @@ int main(int argc, char* argv[])
   gStyle->SetLineWidth(1);
 
   TFile* outFile = new TFile(argv[1], "RECREATE");
-  TDirectory* histDir = outFile->mkdir("histograms");
+  TDirectory* histDir = outFile->mkdir("Histos_different_sigma");
   histDir->cd();
 
   TCanvas* servCan = new TCanvas(); // used for fitting and drawing stuff
+
+  // ---------------------------------- fix landau mpv and width, vary the gauss sigma -------------------
 
   lanMPV = 40;
   lanWidth = 4;
@@ -117,13 +119,107 @@ int main(int argc, char* argv[])
   fitMaxvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
   fitMaxvsGenSig->GetYaxis()->SetTitle("Max of the fit function [A. U.]");
 
-  delete servCan;
-
   outFile->cd();
   fitMPVvsGenSig->Write();
   fitGsigvsGenSig->Write();
   fitWidthvsGenSig->Write();
   fitMaxvsGenSig->Write();
+
+  // ------------------------------ fix all parameters, fit many distributions and look for correlations in the fitted values ----------------
+
+  histDir = outFile->mkdir("Histos_same_parameters");
+  histDir->cd();
+
+  lanMPV = 30;
+  lanWidth = 2;
+  gausSig = 5;
+
+  sprintf(name, "corrGsigma_lanWidth_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Landau width vs Gaus sigma, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TGraphErrors* corrGsigLanW = new TGraphErrors();
+  corrGsigLanW->SetName(name);
+  corrGsigLanW->SetTitle(title);
+
+  sprintf(name, "corrGsigma_lanMPV_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Landau MPV vs Gaus sigma, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TGraphErrors* corrGsigLanMPV = new TGraphErrors();
+  corrGsigLanMPV->SetName(name);
+  corrGsigLanMPV->SetTitle(title);
+
+  sprintf(name, "corrLanMPV_lanWidth_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Landau MPV vs Landau width, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TGraphErrors* corrLanMPVLanW = new TGraphErrors();
+  corrLanMPVLanW->SetName(name);
+  corrLanMPVLanW->SetTitle(title);
+
+  sprintf(name, "distrFitGsig_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Gaus sigma, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TH1D* distrFitGsig = new TH1D(name, title, 150, 0, 15);
+
+  sprintf(name, "distrFitLanW_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Landau width, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TH1D* distrFitLanW = new TH1D(name, title, 150, 0, 15);
+
+  sprintf(name, "distrFitMPV_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
+  sprintf(title, "Fitted Landau MPV, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
+  TH1D* distrFitLanMPV = new TH1D(name, title, 500, 0, 50);
+
+  double fitSig; // fitted parameters
+  double fitMPV;
+  double fitW;
+  double EfitSig; // fitted parameters errors
+  double EfitMPV;
+  double EfitW;
+
+  for(int i = 0; i < 1000; ++i)
+    {
+      hist = genLangaus(nEntries, lanMPV, lanWidth, gausSig);
+      fit = lanGausFit(hist, 10, 100); // warning: fixed parameters!!!!
+      hist->Write();
+      delete hist;
+
+      fitW = fit->GetParameter(0);
+      EfitW = fit->GetParError(0);
+      fitMPV = fit->GetParameter(1);
+      EfitMPV = fit->GetParError(1);
+      fitSig = fit->GetParameter(3);
+      EfitSig = fit->GetParError(3);
+
+      distrFitGsig->Fill(fitSig);
+      distrFitLanW->Fill(fitW);
+      distrFitLanMPV->Fill(fitMPV);
+
+      corrGsigLanW->SetPoint(i, fitSig, fitW);
+      corrGsigLanW->SetPointError(i, EfitSig, EfitW);
+
+      corrGsigLanMPV->SetPoint(i, fitSig, fitMPV);
+      corrGsigLanMPV->SetPointError(i, EfitSig, EfitMPV);
+
+      corrLanMPVLanW->SetPoint(i, fitW, fitMPV);
+      corrLanMPVLanW->SetPointError(i, EfitW, EfitMPV);
+    }
+
+  corrGsigLanW->Draw("AP");
+  corrGsigLanW->GetXaxis()->SetTitle("Fitted Gauss sigma [A. U.]");
+  corrGsigLanW->GetYaxis()->SetTitle("Fitted Landau width [A. U.]");
+
+  corrGsigLanMPV->Draw("AP");
+  corrGsigLanMPV->GetXaxis()->SetTitle("Fitted Gauss sigma [A. U.]");
+  corrGsigLanMPV->GetYaxis()->SetTitle("Fitted Landau MPV [A. U.]");
+
+  corrLanMPVLanW->Draw("AP");
+  corrLanMPVLanW->GetXaxis()->SetTitle("Fitted Landau width [A. U.]");
+  corrLanMPVLanW->GetYaxis()->SetTitle("Fitted Landau MPV [A. U.]");
+
+  outFile->cd();
+  distrFitGsig->Write();
+  distrFitLanW->Write();
+  distrFitLanMPV->Write();
+  corrGsigLanW->Write();
+  corrGsigLanMPV->Write();
+  corrLanMPVLanW->Write();
+
+  delete servCan;
 
   outFile->Close();
 
