@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     }
 
   // constants
-  const int nEntries = 10000;
+  const int nEntries = 2000;
 
   // variables
   double lanMPV;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
       if(gausSig == 0) gausSig = 0.01; // gaus with 0 sigma creates problems
 
       hist = genLangaus(nEntries, lanMPV, lanWidth, gausSig);
-      fit = lanGausFit(hist, 10, 100); // warning: fixed parameters!!!!
+      fit = lanGausFit(hist, 10, 100);
       hist->Write();
 
       nPoint = fitMPVvsGenSig->GetN();
@@ -130,9 +130,9 @@ int main(int argc, char* argv[])
   histDir = outFile->mkdir("Histos_same_parameters");
   histDir->cd();
 
-  lanMPV = 30;
-  lanWidth = 2;
-  gausSig = 5;
+  lanMPV = 40;
+  lanWidth = 4;
+  gausSig = 10;
 
   sprintf(name, "corrGsigma_lanWidth_genLanMPV_%.00f_genLanWidth_%.00f_genGsigma_%.00f", lanMPV, lanWidth, gausSig);
   sprintf(title, "Fitted Landau width vs Gaus sigma, generator: lanMPV %.00f, lanWidth %.00f, Gsig %.00f", lanMPV, lanWidth, gausSig);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
   double EfitMPV;
   double EfitW;
 
-  for(int i = 0; i < 1000; ++i)
+  for(int i = 0; i < 100; ++i)
     {
       hist = genLangaus(nEntries, lanMPV, lanWidth, gausSig);
       fit = lanGausFit(hist, 10, 100); // warning: fixed parameters!!!!
