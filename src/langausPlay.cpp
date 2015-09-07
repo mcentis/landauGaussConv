@@ -14,14 +14,14 @@
 
 int main(int argc, char* argv[])
 {
-  if(argc != 2)
+  if(argc != 3)
     {
-      std::cout << "\tusage: langausPlay outFile" << std::endl;
+      std::cout << "\tusage: langausPlay outFile nEntries" << std::endl;
       return 1;
     }
 
   // constants
-  const int nEntries = 2000;
+  const int nEntries = atoi(argv[2]);
 
   // variables
   double lanMPV;
@@ -62,26 +62,32 @@ int main(int argc, char* argv[])
   TGraphErrors* fitMPVvsGenSig = new TGraphErrors();
   fitMPVvsGenSig->SetName(name);
   fitMPVvsGenSig->SetTitle(title);
+  fitMPVvsGenSig->SetMarkerStyle(20);
 
   sprintf(name, "fitGausSig_genLanMPV_%.00f_genLanWidth_%.00f", lanMPV, lanWidth);
   sprintf(title, "Fitted Gaus sigma vs generator gaus sigma, generator: lanMPV %.00f, lanWidth %.00f", lanMPV, lanWidth);
   TGraphErrors* fitGsigvsGenSig = new TGraphErrors();
   fitGsigvsGenSig->SetName(name);
   fitGsigvsGenSig->SetTitle(title);
+  fitGsigvsGenSig->SetMarkerStyle(20);
 
   sprintf(name, "fitLanW_genLanMPV_%.00f_genLanWidth_%.00f", lanMPV, lanWidth);
   sprintf(title, "Fitted Landau width vs generator gaus sigma, generator: lanMPV %.00f, lanWidth %.00f", lanMPV, lanWidth);
   TGraphErrors* fitWidthvsGenSig = new TGraphErrors();
   fitWidthvsGenSig->SetName(name);
   fitWidthvsGenSig->SetTitle(title);
+  fitWidthvsGenSig->SetMarkerStyle(20);
 
   sprintf(name, "fitMax_genLanMPV_%.00f_genLanWidth_%.00f", lanMPV, lanWidth);
   sprintf(title, "Max of the fit function vs generator gaus sigma, generator: lanMPV %.00f, lanWidth %.00f", lanMPV, lanWidth);
   TGraphErrors* fitMaxvsGenSig = new TGraphErrors();
   fitMaxvsGenSig->SetName(name);
   fitMaxvsGenSig->SetTitle(title);
+  fitMaxvsGenSig->SetMarkerStyle(20);
 
-  for(int i = 0; i < 10; ++i)
+  int maxIter = 15;
+
+  for(int i = 2; i < maxIter; ++i)
     {
       gausSig = i * 2;
       if(gausSig == 0) gausSig = 0.01; // gaus with 0 sigma creates problems
@@ -105,18 +111,22 @@ int main(int argc, char* argv[])
 
   fitMPVvsGenSig->Draw("AP");
   fitMPVvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitMPVvsGenSig->GetXaxis()->SetRangeUser(0, maxIter * 2);
   fitMPVvsGenSig->GetYaxis()->SetTitle("Fitted Landau MPV [A. U.]");
 
   fitGsigvsGenSig->Draw("AP");
   fitGsigvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitGsigvsGenSig->GetXaxis()->SetRangeUser(0, maxIter * 2);
   fitGsigvsGenSig->GetYaxis()->SetTitle("Fitted Gauss sigma [A. U.]");
 
   fitWidthvsGenSig->Draw("AP");
   fitWidthvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitWidthvsGenSig->GetXaxis()->SetRangeUser(0, maxIter * 2);
   fitWidthvsGenSig->GetYaxis()->SetTitle("Fitted Landau width [A. U.]");
 
   fitMaxvsGenSig->Draw("AP");
   fitMaxvsGenSig->GetXaxis()->SetTitle("Generator Gauss sigma [A. U.]");
+  fitMaxvsGenSig->GetXaxis()->SetRangeUser(0, maxIter * 2);
   fitMaxvsGenSig->GetYaxis()->SetTitle("Max of the fit function [A. U.]");
 
   outFile->cd();
